@@ -117,6 +117,11 @@ async def task(
 
 
 @app.get("/task/{id}")
-async def job(request: Request, id: str, response: Response):
-    response.status_code = status.HTTP_200_OK
-    return response
+async def task(
+    request: Request,
+    response: Response,
+    id: str,
+    hx_request: Optional[str] = Header(None),
+):
+    context = {"request": request, "rootPath": ROOT_PATH, "id": id}
+    return templates.TemplateResponse("copycomplete.html", context)
