@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FastAPI demo</title>
+
+  <script src="https://unpkg.com/htmx.org@2.0.4"
+    integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+  <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+
+<body>
+  <div class="m-6">
+    <form hx-post="{{rootPath}}/add" hx-target="#response" hx-ext="json-enc" hx-on::after-request="this.reset()">
+      <textarea id="url" type="text" name="url" rows="5"
+        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Paste magnet link here""
+      oninput=" autoResize(this)"></textarea>
+      <script>
+        function autoResize(textarea) {
+          textarea.style.height = "auto";
+          textarea.style.height = textarea.scrollHeight + "px";
+        }
+        addEventListener("resize", () => autoResize(document.getElementById("url")));
+      </script>
+      <button
+        class="my-6 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+        type="submit">Add Torrent</button>
+    </form>
+    <div class="m-2">
+      <div id="response"></div>
+    </div>
+    <div>
+      <div hx-trigger="load" hx-get="{{rootPath}}/free" hx-swap="outerHTML" hx-target="this" />
+    </div>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-6 py-3">
+              Status
+            </th>
+            <th scope="col""></th>
+            <th scope=" col""></th>
+            <th scope=" col" class="px-6 py-3">
+              Torrent
+            </th>
+            <th scope=" col""></th>
+          </tr>
+        </thead>
+        <tbody class=" text-sm" id="table-body" hx-target="closest tr" hx-swap="outerHTML swap:1s">
+              {% include 'partials/table.html' %}
+              </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+</html>
