@@ -97,7 +97,7 @@ def copyFile(self, torrent: PartialTorrent):
             )
         sftp.close()
         transport.close()
-        # torrentClient.remove_torrent(torrent["id"], delete_data=True)
+        torrentClient.remove_torrent(torrent["id"], delete_data=True)
         cache.delete(id)
         delete(pool, id)
     if isFile:
@@ -109,7 +109,7 @@ def copyFile(self, torrent: PartialTorrent):
         )
         sftp.close()
         transport.close()
-        # torrentClient.remove_torrent(torrent["id"], delete_data=True)
+        torrentClient.remove_torrent(torrent["id"], delete_data=True)
         cache.delete(id)
         delete(pool, id)
 
