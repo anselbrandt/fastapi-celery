@@ -75,7 +75,7 @@ def updateProgress(id):
 @celery.task(bind=True)
 def copyFile(self, torrent: PartialTorrent):
     id = self.request.id
-    # insert(pool, id, torrent["name"])
+    insert(pool, id, torrent["name"])
     transport = paramiko.Transport((REMOTE_HOST, 22))
     inpath = f"{REMOTE_ROOT_PATH}/{torrent["name"]}"
     outpath = inToOut(REMOTE_ROOT_PATH, LOCAL_ROOT_PATH, inpath)

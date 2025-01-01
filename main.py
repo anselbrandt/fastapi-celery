@@ -1,12 +1,17 @@
+from contextlib import asynccontextmanager
 import json
 from typing import Optional
+import os
 
 from fastapi import FastAPI, Request, Header, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from psycopg_pool import AsyncConnectionPool
+from psycopg.rows import dict_row
 import redis
 
+from db_ops import getTasks
 from constants import ROOT_PATH
 from tasks import copyFile
 from utils import (
@@ -17,9 +22,30 @@ from utils import (
     torrentClient,
 )
 
+
+def get_conn_str():
+    return f"""
+    dbname={os.getenv('POSTGRES_DB')}
+    user={os.getenv('POSTGRES_USER')}
+    password={os.getenv('POSTGRES_PASSWORD')}
+    host={os.getenv('POSTGRES_HOST')}
+    port={os.getenv('POSTGRES_PORT')}
+    """
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.pool = AsyncConnectionPool(
+        conninfo=get_conn_str(), open=False, kwargs={"row_factory": dict_row}
+    )
+    await app.pool.open()
+    yield
+    await app.pool.close()
+
+
 cache = redis.Redis(decode_responses=True)
 
-app = FastAPI(root_path=ROOT_PATH)
+app = FastAPI(root_path=ROOT_PATH, lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -125,3 +151,18 @@ async def task(
 ):
     context = {"request": request, "rootPath": ROOT_PATH, "id": id}
     return templates.TemplateResponse("copycomplete.html", context)
+
+
+@app.get("/tasks")
+async def alltasks(
+    request: Request,
+    response: Response,
+    hx_request: Optional[str] = Header(None),
+):
+    results = await getTasks(request.app.pool)
+    context = {
+        "request": request,
+        "rootPath": ROOT_PATH,
+        "inprogress": results,
+    }
+    return templates.TemplateResponse("inprogress.html", context)
