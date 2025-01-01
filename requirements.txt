@@ -1,2 +1,6 @@
+celery==5.4.0
 fastapi[standard]==0.115.6
-transmission-rpc==7.0.11
+honcho==2.0.0
+paramiko==3.5.0
+psycopg[binary,pool]==3.2.3
+redis==5.2.1

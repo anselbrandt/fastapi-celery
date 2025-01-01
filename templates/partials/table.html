@@ -1,5 +1,6 @@
 {% for torrent in torrents %}
-<tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+<tr id="{{torrent.hashString}}"
+  class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
   <th class=" px-6 py-2">
     <div class="flex items-center">
       <div class="{{ indicatorStyle(torrent.status) }}"></div>
@@ -8,7 +9,7 @@
   </th>
   <td scope="row" class="px-6 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
     {% if torrent.status== "seeding" %}
-    <form hx-post="{{rootPath}}/copy" hx-ext="json-enc">
+    <form hx-post="{{rootPath}}/copy" hx-ext="json-enc" hx-target="#{{torrent.hashString}}" hx-swap="outerHTML">
       <input type="hidden" name="name" value="{{torrent.name}}">
       <input type="hidden" name="id" value="{{torrent.hashString}}">
       <button

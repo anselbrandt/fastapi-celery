@@ -1,7 +1,5 @@
-import logging
 import shutil
 from stat import S_ISDIR, S_ISREG
-import os
 
 from pydantic import BaseModel
 import paramiko
@@ -11,19 +9,6 @@ from constants import (
     REMOTE_HOST,
     TRANSMISSION_USERNAME,
     TRANSMISSION_PASSWORD,
-    REMOTE_ROOT_PATH,
-    LOCAL_ROOT_PATH,
-    SSH_USERNAME,
-    SSH_PASSWORD,
-)
-
-stream_handler = logging.StreamHandler()
-stream_handler.setLevel(logging.INFO)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    handlers=[logging.FileHandler("logs.txt"), stream_handler],
 )
 
 torrentClient = Client(
@@ -75,51 +60,6 @@ def fileOrDir(sftp, inpath):
 def inToOut(remote_root, local_root, path):
     outpath = path.replace(remote_root, local_root)
     return outpath
-
-
-def printTotals(transferred, toBeTransferred):
-    if transferred == toBeTransferred:
-        logging.info(f"done")
-
-
-def copy_files(torrent: PartialTorrent):
-    torrentClient = Client(
-        host=REMOTE_HOST,
-        port=9091,
-        username=TRANSMISSION_USERNAME,
-        password=TRANSMISSION_PASSWORD,
-    )
-    transport = paramiko.Transport((REMOTE_HOST, 22))
-    inpath = f"{REMOTE_ROOT_PATH}/{torrent.name}"
-    outpath = inToOut(REMOTE_ROOT_PATH, LOCAL_ROOT_PATH, inpath)
-    transport.connect(None, SSH_USERNAME, SSH_PASSWORD)
-    sftp = paramiko.SFTPClient.from_transport(transport)
-    isFile, isDir = fileOrDir(sftp, inpath)
-    if isDir:
-        paths = listdir_r(sftp, inpath)
-        for remotepath in paths:
-            logging.info(f"{os.path.basename(remotepath)}")
-            localpath = inToOut(REMOTE_ROOT_PATH, LOCAL_ROOT_PATH, remotepath)
-            basedir = os.path.dirname(localpath)
-            os.makedirs(basedir, exist_ok=True)
-            sftp.get(
-                remotepath,
-                localpath,
-                callback=printTotals,
-            )
-        sftp.close()
-        transport.close()
-        torrentClient.remove_torrent(torrent.id, delete_data=True)
-    if isFile:
-        logging.info(f"{os.path.basename(inpath)}")
-        sftp.get(
-            inpath,
-            outpath,
-            callback=printTotals,
-        )
-        sftp.close()
-        transport.close()
-        torrentClient.remove_torrent(torrent.id, delete_data=True)
 
 
 def formatsize(num):
