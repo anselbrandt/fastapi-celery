@@ -20,8 +20,7 @@
     <form hx-post="{{rootPath}}/add" hx-target="#response" hx-ext="json-enc" hx-on::after-request="this.reset()">
       <textarea id="url" type="text" name="url" rows="5"
         class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder="Paste magnet link here""
-      oninput=" autoResize(this)"></textarea>
+        placeholder="Paste magnet link here" oninput=" autoResize(this)"></textarea>
       <script>
         function autoResize(textarea) {
           textarea.style.height = "auto";

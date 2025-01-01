@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Header, BackgroundTasks, Response, status
+from fastapi import FastAPI, Request, Header, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -6,7 +6,6 @@ from typing import Optional
 
 from constants import ROOT_PATH
 from utils import (
-    copy_files,
     formatsize,
     getFree,
     indicatorStyle,
@@ -58,12 +57,10 @@ async def delete(id, response: Response):
 
 
 @app.post("/copy/")
-async def copy(
-    torrent: PartialTorrent, background_tasks: BackgroundTasks, response: Response
-):
-    background_tasks.add_task(copy_files, torrent)
-    response.status_code = status.HTTP_200_OK
-    return response
+async def copy(request: Request, torrent: PartialTorrent, response: Response):
+    id = torrent.id
+    context = {"request": request, "rootPath": ROOT_PATH, "torrent": torrent}
+    return templates.TemplateResponse("copying.html", context)
 
 
 @app.get("/free")
